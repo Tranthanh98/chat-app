@@ -1,16 +1,15 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Box, Avatar, Typography, TextField, IconButton } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
-import { styled } from "@mui/system";
-import ChatBox from "./ChatBox";
 import { VideoCall } from "@mui/icons-material";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CallIcon from "@mui/icons-material/Call";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import SendIcon from "@mui/icons-material/Send";
+import { Avatar, Box, IconButton, TextField, Typography } from "@mui/material";
+import { styled } from "@mui/system";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useBoundStore } from "../slices";
 import * as httpClient from "../utils/httpClient";
 import socket from "../utils/sockerioService";
-import { useParams } from "react-router-dom";
+import ChatBox from "./ChatBox";
 
 const ChatHeader = styled(Box)({
   display: "flex",
@@ -34,11 +33,13 @@ const ChatFooter = styled(Box)({
 });
 
 const ChatWindow = (props) => {
-  const { userId } = useBoundStore();
-  const { conversationId } = useParams();
+  const { userId, conversationId } = useBoundStore();
+  // const { conversationId } = useParams();
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+
+  const messageBoxRef = useRef();
 
   const getMessagesConversation = useCallback(() => {
     if (conversationId) {
@@ -48,6 +49,15 @@ const ChatWindow = (props) => {
       });
     }
   }, [conversationId]);
+
+  useEffect(() => {
+    if (messageBoxRef.current && messages) {
+      messageBoxRef.current.scrollTo({
+        to: messageBoxRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
 
   useEffect(() => {
     getMessagesConversation();
@@ -60,6 +70,13 @@ const ChatWindow = (props) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
+    if (messageBoxRef.current) {
+      messageBoxRef.current.scrollTo({
+        to: messageBoxRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+
     return () => {
       socket.off("receiveMessage");
     };
@@ -67,7 +84,6 @@ const ChatWindow = (props) => {
 
   const sendMessage = () => {
     if (!newMessage.trim()) {
-      console.log("empty");
       return;
     }
     const messageData = {
@@ -120,7 +136,7 @@ const ChatWindow = (props) => {
           </IconButton>
         </Box>
       </ChatHeader>
-      <ChatBody>
+      <ChatBody ref={messageBoxRef}>
         <ChatBox messages={messages} />
       </ChatBody>
       <ChatFooter>

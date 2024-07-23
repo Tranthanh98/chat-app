@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/authController");
+const passport = require("passport");
 
 router.get("/api/login/failed", (req, res) => {
   res.status(401).json({
@@ -11,16 +12,21 @@ router.get("/api/login/failed", (req, res) => {
 
 router.post("/google", authController.googleAuth);
 
-// router.get(
-//   "/google/callback",
-//   passport.authenticate("google", {
-//     successRedirect: "http://localhost:3000",
-//     failureRedirect: "/login/failed",
-//   }),
-//   (req, res) => {
-//     console.log("req", req.body, req.params);
-//   }
-// );
+router.get(
+  "/google/login",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    successRedirect: "http://localhost:3000",
+    failureRedirect: "/login/failed",
+  }),
+  (req, res) => {
+    console.log("req", req.body, req.params);
+  }
+);
 
 // Protected route example
 // router.get("/profile", authController.ensureAuthenticated, (req, res) => {

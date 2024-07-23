@@ -1,19 +1,16 @@
-import React, { useCallback, useEffect, useState } from "react";
-import {
-  List,
-  Box,
-  InputBase,
-  IconButton,
-  styled,
-  Typography,
-  Tooltip,
-} from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import * as httpClient from "../../utils/httpClient";
+import SearchIcon from "@mui/icons-material/Search";
+import {
+  Box,
+  IconButton,
+  InputBase,
+  List,
+  styled,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import React from "react";
 import { useBoundStore } from "../../slices";
-import socket from "../../utils/sockerioService";
-import { useParams } from "react-router-dom";
 import UserChatItem from "./UserChatItem";
 
 const SearchBox = styled("div")({
@@ -24,42 +21,42 @@ const SearchBox = styled("div")({
 });
 
 export default function ChatPanel() {
-  const { userId } = useBoundStore();
-  const [conversations, setConversations] = useState([]);
-  const { setConversationId } = useBoundStore();
+  // const { userId } = useBoundStore();
+  // const [conversations, setConversations] = useState([]);
+  const { conversations } = useBoundStore();
 
-  let { conversationId } = useParams();
+  // let { conversationId } = useParams();
 
-  const fetchingConversation = useCallback(() => {
-    httpClient.sendGet(`/conversations`).then((res) => {
-      const { data: conversationsData } = res;
-      if (conversationsData?.length > 0) {
-        conversationsData.forEach((element) => {
-          element.participants = element.participants.filter(
-            (i) => i._id !== userId
-          );
-        });
-        setConversations(conversationsData);
-        if (!conversationId) {
-          setConversationId(conversationsData[0]?._id);
-        }
-      }
-    });
-  }, [conversationId, setConversationId, userId]);
+  // const fetchingConversation = useCallback(() => {
+  //   httpClient.sendGet(`/conversations`).then((res) => {
+  //     const { data: conversationsData } = res;
+  //     if (conversationsData?.length > 0) {
+  //       conversationsData.forEach((element) => {
+  //         element.participants = element.participants.filter(
+  //           (i) => i._id !== userId
+  //         );
+  //       });
+  //       setConversations(conversationsData);
+  //       if (!conversationId) {
+  //         setConversationId(conversationsData[0]?._id);
+  //       }
+  //     }
+  //   });
+  // }, [conversationId, setConversationId, userId]);
 
-  useEffect(() => {
-    fetchingConversation();
+  // useEffect(() => {
+  //   // fetchingConversation();
 
-    socket.emit("joinUserRoom", userId);
+  //   socket.emit("joinUserRoom", userId);
 
-    socket.on("newMessage", () => {
-      fetchingConversation();
-    });
+  //   socket.on("newMessage", () => {
+  //     fetchingConversation();
+  //   });
 
-    return () => {
-      socket.off("newMessage");
-    };
-  }, [fetchingConversation, userId]);
+  //   return () => {
+  //     socket.off("newMessage");
+  //   };
+  // }, [fetchingConversation, userId]);
 
   return (
     <>

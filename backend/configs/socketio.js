@@ -65,6 +65,7 @@ const initializeSocket = (server) => {
         sender,
         content,
         contentType,
+        readBy: [sender],
       });
 
       try {
@@ -94,6 +95,19 @@ const initializeSocket = (server) => {
         });
       } catch (error) {
         console.error("Error sending message:", error);
+      }
+    });
+
+    socket.on("openConversation", async ({ conversationId, userId }) => {
+      const unreadMessages = await Message.find({
+        conversationId,
+        readBy: { $ne: userId },
+      });
+
+      // Iterate over each unread message and add the userId to the readBy array
+      for (const message of unreadMessages) {
+        message.readBy.push(userId);
+        await message.save();
       }
     });
   });

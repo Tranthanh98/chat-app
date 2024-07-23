@@ -58,7 +58,21 @@ exports.getConversations = async (req, res) => {
       })
       .populate("lastMessage");
 
-    res.json(conversations);
+    const conversationsWithUnreadCount = await Promise.all(
+      conversations.map(async (conversation) => {
+        const conversationObj = conversation.toObject();
+
+        const unreadCount = await Message.countDocuments({
+          conversationId: conversation._id,
+          readBy: { $ne: userId },
+        });
+
+        conversationObj.unreadCount = unreadCount;
+        return conversationObj;
+      })
+    );
+
+    res.json(conversationsWithUnreadCount);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

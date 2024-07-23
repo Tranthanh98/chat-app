@@ -1,18 +1,32 @@
+import { Box, Container } from "@mui/material";
 import React, { useEffect } from "react";
-import { Container, Box } from "@mui/material";
-import Sidebar from "../components/Sidebar";
 import ChatWindow from "../components/ChatWindow";
 import RightPanel from "../components/RightPanel";
-import socket from "../utils/sockerioService";
+import Sidebar from "../components/Sidebar";
+import useFetchingConversationHook from "../hooks/useFetchingConversationHook";
 import { useBoundStore } from "../slices";
+import socket from "../utils/sockerioService";
 
 const ChatPage = () => {
   // const [searchParams, setSearchParams] = useSearchParams();
-  const { userId } = useBoundStore();
+  const { userId, conversationId } = useBoundStore();
+
+  const { fetchingConversation } = useFetchingConversationHook();
 
   useEffect(() => {
     socket.emit("userActive", userId);
   }, [userId]);
+
+  useEffect(() => {
+    socket.emit("openConversation", {
+      conversationId,
+      userId,
+    });
+  }, [conversationId, userId]);
+
+  useEffect(() => {
+    fetchingConversation();
+  }, [fetchingConversation]);
 
   return (
     <Container

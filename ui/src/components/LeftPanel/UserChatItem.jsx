@@ -4,18 +4,16 @@ import {
   Box,
   Chip,
   ListItem,
-  ListItemAvatar,
   Stack,
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getSpecificTime } from "../../utils/timeExtension";
 import { useBoundStore } from "../../slices";
 import socket from "../../utils/sockerioService";
+import { getSpecificTime } from "../../utils/timeExtension";
 
 export default function UserChatItem({ conversation }) {
-  console.log("conversation", conversation);
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(
     conversation.participants.some((i) => i.active)
@@ -24,12 +22,18 @@ export default function UserChatItem({ conversation }) {
   const { userId } = useBoundStore();
 
   let { conversationId } = useParams();
+  const { conversationId: conversationIdStore, setConversationId } =
+    useBoundStore();
 
   const handleSelectConversation = (id) => {
+    setConversationId(id);
     navigate(`/chat/${id}`);
   };
 
   useEffect(() => {
+    if (conversationId) {
+      setConversationId(conversationId);
+    }
     socket.on("userStatus", ({ userId: userConversationId, isOnline }) => {
       console.log("userStatus socket");
       if (
@@ -42,7 +46,7 @@ export default function UserChatItem({ conversation }) {
     return () => {
       socket.off("userStatus");
     };
-  }, [conversation.participants]);
+  }, [conversation.participants, conversationId, setConversationId]);
 
   return (
     <ListItem
@@ -51,20 +55,28 @@ export default function UserChatItem({ conversation }) {
       sx={{
         borderRadius: 2,
         backgroundColor:
-          conversationId === conversation._id ? "#31323d" : "white",
-        color: conversationId === conversation._id ? "white" : "black",
+          conversationIdStore === conversation._id ? "#31323d" : "white",
+        color: conversationIdStore === conversation._id ? "white" : "black",
         boxShadow:
-          conversationId === conversation._id
+          conversationIdStore === conversation._id
             ? "rgb(38, 57, 77) 0px 20px 30px -10px;"
             : "rgba(0, 0, 0, 0.15) 0px 2px 8px;",
         marginBottom: 1,
       }}
     >
-      <ListItemAvatar>
+      <Box>
         <Badge
           color="success"
           variant="dot"
-          sx={{ top: 4, right: 6 }}
+          sx={{
+            ".MuiBadge-badge": {
+              height: "12px !important",
+              width: "12px !important",
+              top: "4px !important",
+              right: "6px !important",
+              borderRadius: "8px !important",
+            },
+          }}
           invisible={!isActive}
         >
           <Avatar
@@ -74,8 +86,8 @@ export default function UserChatItem({ conversation }) {
             src={`${conversation.participants[0]?.avatartUrl}`}
           />
         </Badge>
-      </ListItemAvatar>
-      <Box width={"100%"}>
+      </Box>
+      <Box width={"84%"}>
         <Stack
           direction={"row"}
           justifyContent={"space-between"}
@@ -95,10 +107,24 @@ export default function UserChatItem({ conversation }) {
           justifyContent={"space-between"}
           alignItems={"center"}
         >
-          <Typography variant="caption">{`${
-            conversation.lastMessage?.sender === userId ? "You: " : ""
-          }${conversation.lastMessage?.content}`}</Typography>
-          <Chip label="3" color="primary" size="small" />
+          <Typography
+            variant="caption"
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              width: "80%",
+            }}
+          >{`${conversation.lastMessage?.sender === userId ? "You: " : ""}${
+            conversation.lastMessage?.content
+          }`}</Typography>
+          {conversation.unreadCount > 0 ? (
+            <Chip
+              label={conversation.unreadCount}
+              color="primary"
+              size="small"
+            />
+          ) : null}
         </Stack>
       </Box>
     </ListItem>

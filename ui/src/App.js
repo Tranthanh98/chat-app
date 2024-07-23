@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Navigate,
+  Route,
   BrowserRouter as Router,
   Routes,
-  Route,
-  Navigate,
   useNavigate,
 } from "react-router-dom";
+import "./App.css";
+import CheckIn from "./components/CheckIn";
+import Loading from "./components/Loading";
+import ChatPage from "./pages/ChatPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
-import ChatPage from "./pages/ChatPage";
-import "./App.css";
-import Loading from "./components/Loading";
 import { useBoundStore } from "./slices";
 import * as httpClient from "./utils/httpClient";
 
@@ -45,23 +46,25 @@ const PrivateRoute = ({ element: Component, ...rest }) => {
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<PrivateRoute element={ChatPage} />} />
-        <Route path="/login" exact element={<LoginPage />} />
-        <Route exact path="/signup" element={<SignUpPage />} />
-        <Route
-          exact
-          path="/chat"
-          element={<PrivateRoute element={ChatPage} />}
-        />
-        <Route
-          exact
-          path="/chat/:conversationId"
-          element={<PrivateRoute element={ChatPage} />}
-        />
-      </Routes>
-    </Router>
+    <CheckIn>
+      <Router>
+        <Routes>
+          <Route path="/" element={<PrivateRoute element={ChatPage} />} />
+          <Route path="/login" exact element={<LoginPage />} />
+          <Route exact path="/signup" element={<SignUpPage />} />
+          <Route
+            exact
+            path="/chat"
+            element={<PrivateRoute element={ChatPage} />}
+          />
+          <Route
+            exact
+            path="/chat/:conversationId"
+            element={<PrivateRoute element={ChatPage} />}
+          />
+        </Routes>
+      </Router>
+    </CheckIn>
   );
 };
 

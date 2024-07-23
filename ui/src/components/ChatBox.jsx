@@ -1,9 +1,9 @@
-import React from "react";
-import { Box, Avatar, Typography, Tooltip } from "@mui/material";
+import { Avatar, Box, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/system";
-import { useBoundStore } from "../slices";
 import moment from "moment/moment";
+import React from "react";
 import { FORMAT_DATE_TIME } from "../const/timeFormat";
+import { useBoundStore } from "../slices";
 
 const MessageRow = styled(Box)({
   display: "flex",
@@ -13,7 +13,6 @@ const MessageRow = styled(Box)({
 
 export default function ChatBox({ messages }) {
   const { userInfo } = useBoundStore();
-
   let prevSender = null;
   let nextSender = messages[1]?.sender;
 
